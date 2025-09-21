@@ -18,7 +18,7 @@ else:
     plt.rcParams['font.family'] = 'Tahoma'
 
 # --- ส่วนที่ 2: การสร้าง User Interface (UI) ---
-st.title('Trade Bot')
+st.title('Trade Bot สำหรับคุณพ่อ')
 
 st.sidebar.header('กรอกชื่อหุ้น')
 ticker_symbol = st.sidebar.text_input('กรอกชื่อหุ้น (เช่น PTTGC.BK):', 'OR.BK')
@@ -79,13 +79,14 @@ if ticker_symbol:
             # --- ส่วนที่ 4: การวิเคราะห์และแสดงสัญญาณซื้อ-ขาย ---
             st.subheader('การวิเคราะห์และสัญญาณซื้อ-ขาย 🚦')
             
-            latest_data = stock_data.iloc[-1]
-            latest_sma_10 = latest_data['SMA_10']
-            latest_sma_20 = latest_data['SMA_20']
-            latest_rsi = latest_data['RSI']
+            # แก้ไขตรงนี้: ใช้ .iloc[-1] เพื่อเข้าถึงแถวสุดท้าย และ .item() เพื่อดึงค่าเดี่ยวออกมา
+            # วิธีนี้จะดึงค่าเพียงค่าเดียว ไม่ใช่ Series
+            latest_sma_10 = stock_data['SMA_10'].iloc[-1].item() if not stock_data['SMA_10'].empty else None
+            latest_sma_20 = stock_data['SMA_20'].iloc[-1].item() if not stock_data['SMA_20'].empty else None
+            latest_rsi = stock_data['RSI'].iloc[-1].item() if not stock_data['RSI'].empty else None
 
             # วิเคราะห์จาก SMA
-            if pd.isna(latest_sma_10) or pd.isna(latest_sma_20):
+            if latest_sma_10 is None or latest_sma_20 is None or pd.isna(latest_sma_10) or pd.isna(latest_sma_20):
                 st.markdown(
                     f"<p style='color:gray; font-size:20px;'>🟡 **ข้อมูล SMA ยังไม่เพียงพอ**</p>"
                     "<p>ต้องมีข้อมูลย้อนหลังอย่างน้อย 20 วัน</p>",
@@ -113,7 +114,7 @@ if ticker_symbol:
             st.write("---")
 
             # วิเคราะห์จาก RSI
-            if pd.isna(latest_rsi):
+            if latest_rsi is None or pd.isna(latest_rsi):
                 st.markdown(
                     f"<p style='color:gray; font-size:20px;'>🟡 **ข้อมูล RSI ยังไม่เพียงพอ**</p>"
                     "<p>ต้องมีข้อมูลย้อนหลังอย่างน้อย 14 วัน</p>",
