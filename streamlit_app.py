@@ -21,10 +21,14 @@ else:
 st.title('Trade Bot สำหรับคุณพ่อ')
 
 st.sidebar.header('กรอกชื่อหุ้น')
-ticker_symbol = st.sidebar.text_input('กรอกชื่อหุ้น (เช่น PTTGC.BK):', 'OR.BK')
+ticker_symbol = st.sidebar.text_input('กรอกชื่อหุ้น:', 'OR') # แก้ไขตัวอย่างชื่อหุ้น
 
 # --- ส่วนที่ 3: การประมวลผลและวิเคราะห์ข้อมูล ---
 if ticker_symbol:
+    # แก้ไขตรงนี้: เพิ่ม .BK ถ้าผู้ใช้ไม่ได้พิมพ์มา
+    if not ticker_symbol.upper().endswith('.BK'):
+        ticker_symbol += '.BK'
+
     try:
         end_date = datetime.now()
         start_date = end_date - timedelta(days=365)
@@ -79,14 +83,13 @@ if ticker_symbol:
             # --- ส่วนที่ 4: การวิเคราะห์และแสดงสัญญาณซื้อ-ขาย ---
             st.subheader('การวิเคราะห์และสัญญาณซื้อ-ขาย 🚦')
             
-            # แก้ไขตรงนี้: ใช้ .iloc[-1] เพื่อเข้าถึงแถวสุดท้าย และ .item() เพื่อดึงค่าเดี่ยวออกมา
-            # วิธีนี้จะดึงค่าเพียงค่าเดียว ไม่ใช่ Series
-            latest_sma_10 = stock_data['SMA_10'].iloc[-1].item() if not stock_data['SMA_10'].empty else None
-            latest_sma_20 = stock_data['SMA_20'].iloc[-1].item() if not stock_data['SMA_20'].empty else None
-            latest_rsi = stock_data['RSI'].iloc[-1].item() if not stock_data['RSI'].empty else None
+            # ดึงค่าล่าสุดและตรวจสอบ
+            latest_sma_10 = stock_data['SMA_10'].iloc[-1] if not stock_data['SMA_10'].empty else None
+            latest_sma_20 = stock_data['SMA_20'].iloc[-1] if not stock_data['SMA_20'].empty else None
+            latest_rsi = stock_data['RSI'].iloc[-1] if not stock_data['RSI'].empty else None
 
             # วิเคราะห์จาก SMA
-            if latest_sma_10 is None or latest_sma_20 is None or pd.isna(latest_sma_10) or pd.isna(latest_sma_20):
+            if pd.isna(latest_sma_10) or pd.isna(latest_sma_20):
                 st.markdown(
                     f"<p style='color:gray; font-size:20px;'>🟡 **ข้อมูล SMA ยังไม่เพียงพอ**</p>"
                     "<p>ต้องมีข้อมูลย้อนหลังอย่างน้อย 20 วัน</p>",
@@ -114,7 +117,7 @@ if ticker_symbol:
             st.write("---")
 
             # วิเคราะห์จาก RSI
-            if latest_rsi is None or pd.isna(latest_rsi):
+            if pd.isna(latest_rsi):
                 st.markdown(
                     f"<p style='color:gray; font-size:20px;'>🟡 **ข้อมูล RSI ยังไม่เพียงพอ**</p>"
                     "<p>ต้องมีข้อมูลย้อนหลังอย่างน้อย 14 วัน</p>",
