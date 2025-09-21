@@ -21,7 +21,7 @@ else:
     plt.rcParams['font.family'] = 'Tahoma' # ใช้ฟอนต์อื่นแทน
 
 # --- ส่วนที่ 2: การสร้าง User Interface (UI) ---
-st.title('Trade Bot สำหรับคุณพ่อ')
+st.title('Simple Trade Bot')
 
 # ส่วนกรอกชื่อหุ้นใน Sidebar
 st.sidebar.header('กรอกชื่อหุ้น')
