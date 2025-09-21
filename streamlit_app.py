@@ -26,7 +26,6 @@ ticker_symbol_input = st.sidebar.text_input('กรอกชื่อหุ้�
 # --- ส่วนที่ 3: การประมวลผลและวิเคราะห์ข้อมูล ---
 if ticker_symbol_input:
     ticker_symbol = ticker_symbol_input.strip().upper()
-    # เพิ่ม .BK ถ้าผู้ใช้ไม่ได้พิมพ์มาและสัญลักษณ์ไม่ใช่ตัวย่อของไทย (4 ตัวอักษรขึ้นไป)
     if not ticker_symbol.endswith('.BK') and len(ticker_symbol) > 1:
         ticker_symbol += '.BK'
 
@@ -41,11 +40,9 @@ if ticker_symbol_input:
         else:
             st.success(f"ดึงข้อมูลหุ้น {ticker_symbol} สำเร็จ!")
             
-            # คำนวณ Simple Moving Average (SMA)
             stock_data['SMA_10'] = stock_data['Close'].rolling(window=10).mean()
             stock_data['SMA_20'] = stock_data['Close'].rolling(window=20).mean()
 
-            # ส่วนเพิ่มใหม่: คำนวณ RSI
             delta = stock_data['Close'].diff()
             gain = delta.where(delta > 0, 0)
             loss = -delta.where(delta < 0, 0)
@@ -54,17 +51,15 @@ if ticker_symbol_input:
             rs = avg_gain / avg_loss
             stock_data['RSI'] = 100 - (100 / (1 + rs))
 
-            # ดึงค่าล่าสุด
-            latest_data = stock_data.iloc[-1]
-            latest_sma_10 = latest_data.get('SMA_10')
-            latest_sma_20 = latest_data.get('SMA_20')
-            latest_rsi = latest_data.get('RSI')
-            
+            # ดึงค่าล่าสุดอย่างระมัดระวังด้วย .item()
+            latest_sma_10 = stock_data['SMA_10'].iloc[-1] if not stock_data['SMA_10'].empty and not pd.isna(stock_data['SMA_10'].iloc[-1]) else None
+            latest_sma_20 = stock_data['SMA_20'].iloc[-1] if not stock_data['SMA_20'].empty and not pd.isna(stock_data['SMA_20'].iloc[-1]) else None
+            latest_rsi = stock_data['RSI'].iloc[-1] if not stock_data['RSI'].empty and not pd.isna(stock_data['RSI'].iloc[-1]) else None
+
             # --- ส่วนที่ 4: การวิเคราะห์และแสดงสัญญาณซื้อ-ขาย ---
             st.header('ผลการวิเคราะห์ล่าสุด 📊')
             
-            # วิเคราะห์จาก SMA
-            if pd.isna(latest_sma_10) or pd.isna(latest_sma_20):
+            if latest_sma_20 is None or latest_rsi is None:
                 st.info("ข้อมูลยังไม่เพียงพอสำหรับวิเคราะห์ โปรดดูตารางข้อมูลและกราฟด้านล่าง")
             elif latest_sma_10 > latest_sma_20 and latest_rsi < 70:
                 st.success("🟢 **แนวโน้ม: น่าสนใจ** - สัญญาณ SMA ชี้ว่ามีแนวโน้มขาขึ้นและ RSI ยังไม่อยู่ในโซน Overbought")
@@ -76,11 +71,9 @@ if ticker_symbol_input:
             # --- ส่วนที่ 5: การแสดงกราฟและตารางข้อมูล ---
             st.subheader('กราฟราคาและตารางข้อมูล 📈')
             
-            # สร้าง Subplots สำหรับกราฟราคาและ RSI
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), gridspec_kw={'height_ratios': [3, 1]})
             fig.subplots_adjust(hspace=0.5)
 
-            # กราฟราคาหลัก (SMA)
             ax1.plot(stock_data['Close'], label='ราคาปิด', color='blue')
             ax1.plot(stock_data['SMA_10'], label='SMA 10 วัน', color='green')
             ax1.plot(stock_data['SMA_20'], label='SMA 20 วัน', color='red')
@@ -90,7 +83,6 @@ if ticker_symbol_input:
             ax1.legend()
             ax1.grid(True)
             
-            # กราฟ RSI
             ax2.plot(stock_data['RSI'], label='RSI', color='purple')
             ax2.axhline(70, linestyle='--', color='red', label='Overbought (70)')
             ax2.axhline(30, linestyle='--', color='green', label='Oversold (30)')
