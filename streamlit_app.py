@@ -18,7 +18,7 @@ else:
     plt.rcParams['font.family'] = 'Tahoma'
 
 # --- ส่วนที่ 2: การสร้าง User Interface (UI) ---
-st.title('Trade Bot สำหรับคุณพ่อ')
+st.title('Trade Bot')
 
 st.sidebar.header('กรอกชื่อหุ้น')
 ticker_symbol = st.sidebar.text_input('กรอกชื่อหุ้น (เช่น PTTGC.BK):', 'OR.BK')
@@ -40,7 +40,7 @@ if ticker_symbol:
             stock_data['SMA_10'] = stock_data['Close'].rolling(window=10).mean()
             stock_data['SMA_20'] = stock_data['Close'].rolling(window=20).mean()
 
-            # --- ส่วนเพิ่มใหม่: คำนวณ RSI ---
+            # ส่วนเพิ่มใหม่: คำนวณ RSI
             delta = stock_data['Close'].diff()
             gain = delta.where(delta > 0, 0)
             loss = -delta.where(delta < 0, 0)
@@ -106,7 +106,7 @@ if ticker_symbol:
             else:
                 st.markdown(
                     f"<p style='color:orange; font-size:20px;'>🟡 **สัญญาณจาก SMA: ยังไม่ชัดเจน**</p>"
-                    "<p>ราคาเคลื่อนที่อยู่ในกรอบใกล้เคียงกัน</p>",
+                    "<p>ราคาเคลื่อนที่อยู่ในกรอบใกล้เคียงกัน ควรเฝ้ารอเพื่อดู Trend ไปก่อน</p>",
                     unsafe_allow_html=True
                 )
 
